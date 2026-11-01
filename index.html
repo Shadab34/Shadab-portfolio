@@ -113,9 +113,9 @@ h2{font-size:clamp(36px,5.6vw,64px);font-weight:700;margin-bottom:12px}
 .run-head h2{margin:0}
 .count{font:800 clamp(56px,9vw,112px)/.9 "Bricolage Grotesque",sans-serif;color:var(--accent);font-variant-numeric:tabular-nums}
 .count small{font:600 16px "Instrument Sans",sans-serif;color:var(--muted);margin-left:10px}
-.ring-wrap{perspective:1100px;height:300px;position:relative;margin-top:14px}
+.ring-wrap{perspective:var(--persp,1600px);height:300px;position:relative;margin-top:14px}
 .ring{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;transform:rotateX(-10deg)}
-.rc{position:absolute;left:-100px;top:-70px;width:200px;height:140px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;justify-content:space-between;backface-visibility:hidden;box-shadow:0 20px 40px -22px rgba(0,0,0,.45);transition:border-color .3s,box-shadow .3s}
+.rc{position:absolute;left:calc(var(--cw,200px) / -2);top:-70px;width:var(--cw,200px);height:140px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;justify-content:space-between;backface-visibility:hidden;box-shadow:0 20px 40px -22px rgba(0,0,0,.45);transition:border-color .3s,box-shadow .3s}
 .rc.front{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),0 30px 60px -24px rgba(11,107,122,.6)}
 .rc b{font:700 18px/1.2 "Bricolage Grotesque",sans-serif}
 .rc small{color:var(--muted);font-size:13px}
@@ -458,8 +458,17 @@ var names = rc.map(function(c){ return c.querySelector("b").textContent; });
 var sentN = document.getElementById("sentN"), runCap = document.getElementById("runCap");
 var tl = document.getElementById("tl");
 
+var ringWrap = ring.parentElement, W = 200, R = 460;
+function layout(){
+  W = Math.min(200, innerWidth * 0.5);
+  R = W * 2.3;
+  ring.style.setProperty("--cw", W + "px");
+  ringWrap.style.setProperty("--persp", (W * 8) + "px");
+}
+layout();
+
 function ringSet(p){
-  var N = rc.length, R = Math.min(340, innerWidth * 0.55), best = -2, bi = 0;
+  var N = rc.length, best = -2, bi = 0;
   rc.forEach(function(c, i){
     var a = i * 360 / N + p * 360;
     var cs = Math.cos(a * Math.PI / 180);
@@ -513,7 +522,7 @@ function frame(){
 }
 function request(){ if (!ticking){ ticking = true; requestAnimationFrame(frame); } }
 addEventListener("scroll", request, {passive:true});
-addEventListener("resize", function(){ vh = innerHeight; request(); });
+addEventListener("resize", function(){ vh = innerHeight; layout(); request(); });
 
 /* ---------- pointer interactions (fine pointers only) ---------- */
 document.getElementById("top").addEventListener("pointermove", function(e){
